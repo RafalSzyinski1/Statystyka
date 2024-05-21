@@ -32,15 +32,21 @@ frame
 
 ## Wykresy
 
-```{r plots}
+```{r libs}
+install.packages("ggplot2")
+install.packages("readr")
+install.packages("dplyr")
 library(ggplot2)
+library(readr)
+library(dplyr)
+```
 
-p <- ggplot() + 
+```{r plots_histogram}
+ggplot() + 
   geom_bar(
     data=data, 
     aes(x=type_trans, y=items, color=gender, fill=gender), 
-    stat="identity",
-    alpha=0.5
+    stat="identity"
     ) +
   labs(
     title="Histogram zakupu rodzaju dobra w zależności od płci",
@@ -48,7 +54,6 @@ p <- ggplot() +
     y="Sumaryczna ilość produktu"
     ) +
   theme_classic()
-p
 ```
 
 
