@@ -1,0 +1,57 @@
+---
+title: "Statystyka"
+author: "Rafał Szyiński, Kajetan Leszak"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+# Statystyka
+
+## Opis baza danych
+
+- Baza pochodzi z eportal
+- Baza danych składa się z ...
+- Opis poszczególnych kolumn
+
+```{r ladowanie_bazy_danych}
+data <- read.csv2("credit_card.xls");
+data
+```
+
+## Wyliczenie podstawowych statystyk
+
+Statysyka będzie wyliczona z columny items i spent
+
+```{r statystyka_items_i_spent}
+frame <- data.frame(
+  items_summary=unclass(summary(data$items)),
+  spent_summary=unclass(summary(data$spent))
+  )
+frame
+```
+
+## Wykresy
+
+```{r plots}
+library(ggplot2)
+
+p <- ggplot() + 
+  geom_bar(
+    data=data, 
+    aes(x=type_trans, y=items, color=gender, fill=gender), 
+    stat="identity",
+    alpha=0.5
+    ) +
+  labs(
+    title="Histogram zakupu rodzaju dobra w zależności od płci",
+    x="Rodzaj dobra",
+    y="Sumaryczna ilość produktu"
+    ) +
+  theme_classic()
+p
+```
+
+
+
+
+
