@@ -7,6 +7,14 @@ output: pdf_document
 
 # Statystyka
 
+## Wstęp
+
+```{r libs}
+library(ggplot2)
+library(readr)
+library(dplyr)
+```
+
 ## Opis baza danych
 
 - Baza pochodzi z eportal
@@ -32,16 +40,7 @@ frame
 
 ## Wykresy
 
-```{r libs}
-install.packages("ggplot2")
-install.packages("readr")
-install.packages("dplyr")
-library(ggplot2)
-library(readr)
-library(dplyr)
-```
-
-```{r plots_histogram}
+```{r plot_histogram}
 ggplot() + 
   geom_bar(
     data=data, 
@@ -51,9 +50,41 @@ ggplot() +
   labs(
     title="Histogram zakupu rodzaju dobra w zależności od płci",
     x="Rodzaj dobra",
-    y="Sumaryczna ilość produktu"
+    y="Sumaryczna ilość zakupionych produktów"
     ) +
   theme_classic()
+```
+
+```{r plot_linear}
+# Filtrujemy wysztkie dane pierwszego użytkownika
+user_data <- data[data$custid == "8257-BKBEDP-MRF",]
+
+month_numeric <- c("January", "February", "March", "April","May", "June", "July", "August", "September", "October", "November", "December" )
+
+# Zamiana miesiąca z słowa na liczbe np. January=1
+month <- match(user_data$month, month_numeric)
+
+user_date_items = data.frame(
+  year = user_data$year,
+  month = month,
+  items = user_data$items
+  )
+
+# Sortowanie po roku i miesiącu
+sorted_user <- user_date_items[order(user_date_items$year, user_date_items$month),]
+# Sumaryczny wektor 
+sorted_user$items <- cumsum(sorted_user$items)
+data_length = length(sorted_user$items)
+
+ggplot() +
+  geom_line(
+    data=sorted_user, 
+    aes(x = seq(from=1, to=data_length), y = items)) + 
+  scale_x_continuous(
+    breaks= seq(from=1, to=data_length, by=5), 
+    labels=c(paste(rep(2007, 12), month_numeric, sep="-"), paste(rep(2008, 12), month_numeric, sep="-"))) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+
 ```
 
 
