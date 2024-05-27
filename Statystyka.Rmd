@@ -64,30 +64,79 @@ month_numeric <- c("January", "February", "March", "April","May", "June", "July"
 # Zamiana miesiąca z słowa na liczbe np. January=1
 month <- match(user_data$month, month_numeric)
 
-user_date_items = data.frame(
+user_date_spent = data.frame(
   year = user_data$year,
   month = month,
-  items = user_data$items
+  spent = user_data$spent
   )
 
 # Sortowanie po roku i miesiącu
-sorted_user <- user_date_items[order(user_date_items$year, user_date_items$month),]
+sorted_user <- user_date_spent[order(user_date_spent$year, user_date_spent$month),]
 # Sumaryczny wektor 
-sorted_user$items <- cumsum(sorted_user$items)
-data_length = length(sorted_user$items)
+sorted_user$spent <- cumsum(sorted_user$spent)
+data_length = length(sorted_user$spent)
 
 ggplot() +
   geom_line(
     data=sorted_user, 
-    aes(x = seq(from=1, to=data_length), y = items)) + 
+    aes(x = seq(from=1, to=data_length), y = spent),
+    color = "chartreuse3",
+    linewidth = 1
+    ) + 
   scale_x_continuous(
     breaks= seq(from=1, to=data_length, by=5), 
-    labels=c(paste(rep(2007, 12), month_numeric, sep="-"), paste(rep(2008, 12), month_numeric, sep="-"))) +
+    labels=c(paste(rep(2007, 12), month_numeric, sep="-"), paste(rep(2008, 12), month_numeric, sep="-"))
+    ) +
+  labs(
+    title = "Wydatki użytkownika 8257-BKBEDP-MRF względem czasu",
+    x = NULL,
+    y = "Sumaryczne wydatki"
+  ) +
   theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
 
 ```
 
+```{r plot_density}
+# TODO: poprawić
+ggplot() +
+  geom_density(data=data, aes(x=birth_year))
 
+```
 
+## Obserwacje odstające
 
+Będziemy obserwować wydatki osób w zależności od ich wieku
 
+### Przygotowanie danych
+
+```{r data_prep}
+user_data = 
+  data.frame(year=data$birth_year, spent=data$spent) %>%
+  group_by(year) %>% 
+  summarize(
+    total_spent=sum(spent),
+    q1 = quantile(spent, 0.25),
+    median = median(spent),
+    q3 = quantile(spent, 0.75),
+    lower_whisker = max(min(spent), q1 - 1.5 * IQR(spent)),
+    upper_whisker = min(max(spent), q3 + 1.5 * IQR(spent)),
+    mean = mean(spent),
+    sd = sd(spent)
+  )
+
+user_data
+```
+
+### Wykres pudełko-wąsy
+
+```{r plot_boxwhisker}
+ggplot() +
+  geom_boxplot(data=data, aes(x=birth_year, y=spent, group=birth_year)) +
+  theme_bw()
+```
+
+### Odchylenie standardowe
+
+```{r plot_density}
+
+```
