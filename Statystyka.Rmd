@@ -40,7 +40,7 @@ frame
 
 ## Wykresy
 
-```{r plot_histogram}
+```{r plot_box}
 ggplot() + 
   geom_bar(
     data=data, 
@@ -48,7 +48,7 @@ ggplot() +
     stat="identity"
     ) +
   labs(
-    title="Histogram zakupu rodzaju dobra w zależności od płci",
+    title="Wykres słupkowy dla zakupu rodzaju dobra w zależności od płci",
     x="Rodzaj dobra",
     y="Sumaryczna ilość zakupionych produktów"
     ) +
@@ -96,10 +96,10 @@ ggplot() +
 
 ```
 
-```{r plot_density}
-# TODO: poprawić
+```{r plot_histogram}
+# TODO: label
 ggplot() +
-  geom_density(data=data, aes(x=birth_year))
+  geom_histogram(data=data, aes(x=card), stat="count")
 
 ```
 
@@ -129,7 +129,14 @@ user_data
 
 ### Wykres pudełko-wąsy
 
+```{r values}
+outliers_1929 <- data[data$birth_year == 1929,]$spent
+outliers_1929 <- outliers_1929[outliers_1929 > user_data[user_data$year == 1929,]$upper_whisker]
+outliers_1929
+```
+
 ```{r plot_boxwhisker}
+# TODO: opisac
 ggplot() +
   geom_boxplot(data=data, aes(x=birth_year, y=spent, group=birth_year)) +
   theme_bw()
@@ -138,5 +145,12 @@ ggplot() +
 ### Odchylenie standardowe
 
 ```{r plot_density}
+# TODO: wyliczyc i wyrysować dla 1929
+spent = data[data$birth_year == 1929,]$spent
+
+spent
+a <- dnorm(spent, user_data$mean, user_data$sd)
+ggplot() +
+  geom_line(data=data.frame(x=spent, y=a), aes(x, y))
 
 ```
