@@ -23,7 +23,6 @@ library(dplyr)
 
 ```{r db_load}
 data <- read.csv2("credit_card.xls");
-data
 ```
 
 ## Wyliczenie podstawowych statystyk
@@ -97,9 +96,19 @@ ggplot() +
 ```
 
 ```{r plot_histogram}
-# TODO: label
+
 ggplot() +
-  geom_histogram(data=data, aes(x=card), stat="count")
+  geom_histogram(
+    data=data, 
+    aes(x=card), 
+    stat="count", 
+    fill="lightblue") +
+  labs(
+    title = "Histogram typu używanych kart",
+    x = "Typ karty",
+    y = "Ilość użycia"
+    ) +
+  theme_minimal()
 
 ```
 
@@ -123,8 +132,6 @@ user_data =
     mean = mean(spent),
     sd = sd(spent)
   )
-
-user_data
 ```
 
 ### Wykres pudełko-wąsy
@@ -138,7 +145,16 @@ outliers_1929
 ```{r plot_boxwhisker}
 # TODO: opisac
 ggplot() +
-  geom_boxplot(data=data, aes(x=birth_year, y=spent, group=birth_year)) +
+  geom_boxplot(
+    data=data, 
+    aes(x=birth_year, y=spent, group=birth_year),
+    color="cadetblue"
+    ) +
+  labs(
+    title = "Wykres pudełko-wąsy dla wydatków w zależności od wieku osoby",
+    x = "Rok urodzenia",
+    y = "Wydaki",
+    )
   theme_bw()
 ```
 
