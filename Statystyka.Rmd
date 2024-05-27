@@ -21,7 +21,7 @@ library(dplyr)
 - Baza danych składa się z ...
 - Opis poszczególnych kolumn
 
-```{r ladowanie_bazy_danych}
+```{r db_load}
 data <- read.csv2("credit_card.xls");
 data
 ```
@@ -30,7 +30,7 @@ data
 
 Statysyka będzie wyliczona z columny items i spent
 
-```{r statystyka_items_i_spent}
+```{r summary_items_spent}
 frame <- data.frame(
   items_summary=unclass(summary(data$items)),
   spent_summary=unclass(summary(data$spent))
