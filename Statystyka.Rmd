@@ -127,8 +127,8 @@ user_data =
     q1 = quantile(spent, 0.25),
     median = median(spent),
     q3 = quantile(spent, 0.75),
-    lower_whisker = max(min(spent), q1 - 1.5 * IQR(spent)),
-    upper_whisker = min(max(spent), q3 + 1.5 * IQR(spent)),
+    lower_whisker = max(min(spent), q1 - 1.5 * (q3 - q1)),
+    upper_whisker = min(max(spent), q3 + 1.5 * (q3 - q1)),
     mean = mean(spent),
     sd = sd(spent)
   )
@@ -143,7 +143,6 @@ outliers_1929
 ```
 
 ```{r plot_boxwhisker}
-# TODO: opisac
 ggplot() +
   geom_boxplot(
     data=data, 
@@ -154,19 +153,141 @@ ggplot() +
     title = "Wykres pudełko-wąsy dla wydatków w zależności od wieku osoby",
     x = "Rok urodzenia",
     y = "Wydaki",
-    )
+    ) +
   theme_bw()
 ```
 
 ### Odchylenie standardowe
 
-```{r plot_density}
-# TODO: wyliczyc i wyrysować dla 1929
+```{r values}
 spent = data[data$birth_year == 1929,]$spent
+data_1929 = user_data[user_data$year == 1929,]
+norm <- dnorm(spent, data_1929$mean, data_1929$sd)
+threashold <- data_1929$mean + 3 * data_1929$sd
+outliers_1929 <- spent[spent > threashold]
+outliers_1929
+```
 
-spent
-a <- dnorm(spent, user_data$mean, user_data$sd)
+```{r plot_density}
 ggplot() +
-  geom_line(data=data.frame(x=spent, y=a), aes(x, y))
+  geom_line(data=data.frame(x=spent, y=norm), aes(x, y)) +
+  geom_point(data=data.frame(x=spent, y=norm), aes(x, y), color="red") + 
+  geom_vline(xintercept=threashold) +
+  labs(
+    title = "Prawdopodobieństwo wydatków ludzi urodzonych w 1929",
+    x = "Wydatki",
+    y = "Prawdopodobieństwo"
+  ) +
+  theme_minimal()
+```
 
+## Wyliczenie prawdopodobieństwa dla zmiennej
+
+### Gerenowanie prób losowych
+
+```{r random_sample}
+x <- data$card_year
+mean_x <- mean(x)
+sd_x <- sd(x)
+
+continuous_dnorm <- dnorm(x, mean_x, sd_x)
+continuous_pnorm <- pnorm(x, mean_x, sd_x)
+
+discreet_dbinom <- dbinom(x, length(x), 0.085)
+discreet_pbinom <- pbinom(x, length(x), 0.085)
+```
+
+### Wykres ciągły
+
+```{r continuous_probability_plot}
+ggplot() +
+  geom_line(data=data.frame(x=x, y=continuous_dnorm), aes(x, y))
+ggplot() + 
+  geom_line(data=data.frame(x=x, y=continuous_pnorm), aes(x, y))
+```
+
+### Wykres dyskretny
+
+```{r discreet_probability_plot}
+ggplot() +
+  geom_point(data=data.frame(x=x, y=discreet_dbinom), aes(x, y))
+ggplot() + 
+  geom_point(data=data.frame(x=x, y=discreet_pbinom), aes(x, y))
+```
+
+## Macierz
+
+```{r matrix}
+matrix <- matrix(data$card_year) %>% cbind(data$items) %>% cbind(data$spent)
+
+matrix_data = list(
+  dimension = dim(matrix),
+  number_of_row = nrow(matrix),
+  number_of_colum = ncol(matrix),
+  sum_of_columns = colSums(matrix),
+  sum_of_first_two_row = rowSums(matrix[1:2,]),
+  sum_of_all_elemets = sum(matrix))
+
+matrix_data
+```
+
+## Przedziały ufności
+
+## Hipotezy
+
+## Regresja liniowa
+
+### Przygotowanie danych
+
+Powtórzony kod z wykresu liniowego
+
+```{r data_prep}
+user_data <- data[data$custid == "8257-BKBEDP-MRF",]
+
+month_numeric <- c("January", "February", "March", "April","May", "June", "July", "August", "September", "October", "November", "December" )
+
+month <- match(user_data$month, month_numeric)
+
+user_date_spent = data.frame(
+  year = user_data$year,
+  month = month,
+  spent = user_data$spent
+  )
+
+sorted_user <- user_date_spent[order(user_date_spent$year, user_date_spent$month),]
+ 
+sorted_user$spent <- cumsum(sorted_user$spent)
+data_length = length(sorted_user$spent)
+
+# Obliczanie regresji liniowej
+x <- seq(from=1, to=data_length)
+model <- lm(sorted_user$spent ~ x)
+y <- model$coefficients[2] * x + model$coefficients[1]
+```
+
+### Wykres
+
+```{r plot_linear_regresion}
+ggplot() +
+  geom_point(
+    data=sorted_user, 
+    aes(x = seq(from=1, to=data_length), y = spent),
+    size = 0.7
+    ) +
+  geom_line(
+    data=data.frame(x=x, y=y), 
+    aes(x = x, y = y),
+    color = "blue"
+    ) +
+  scale_x_continuous(
+    breaks= seq(from=1, to=data_length, by=5), 
+    labels=c(paste(rep(2007, 12), month_numeric, sep="-"), paste(rep(2008, 12), month_numeric, sep="-"))
+    ) +
+  labs(
+    title = "Wydatki użytkownika 8257-BKBEDP-MRF\nwzględem czasu (regresja liniowa)",
+    subtitle = sprintf("A = %.02f, B = %.02f", model$coefficients[2], model$coefficients[1]),
+    x = NULL,
+    y = "Sumaryczne wydatki"
+  ) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
 ```
