@@ -276,7 +276,48 @@ matrix_data
 
 ## Przedziały ufności
 
+### Zmienna numeryczna
+
+```{r numeric_confidence_intervals}
+x <- data$items
+n <- length(x)
+alpha <- 0.01
+z <- qnorm(1 - alpha / 2)
+
+x_mean <- mean(x)
+x_sd <- sd(x)
+x_dnorm <- dnorm(x, x_mean, x_sd)
+
+lower_bound <- x_mean - (z * x_sd / sqrt(n))
+upper_bound <- x_mean + (z * x_sd / sqrt(n))
+
+lower_bound
+upper_bound
+```
+
+### Zmienna jakościowa
+
+Przedział ufności Walda
+
+```{r qualitative_confidence_intervals}
+
+cards_data <- data %>% group_by(card) %>% summarise(count = n())
+n <- length(data$card)
+p <- cards_data[cards_data$card == "Mastercard",]$count / n
+
+alpha <- 0.001
+z <- qnorm(1 - alpha / 2)
+
+lower_bound <- p - z * sqrt(p * (1 - p) / n)
+upper_bound <- p + z * sqrt(p * (1 - p) / n)
+
+lower_bound
+upper_bound
+```
+
 ## Hipotezy
+
+
 
 ## Regresja liniowa
 
