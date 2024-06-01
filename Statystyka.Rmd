@@ -317,6 +317,24 @@ upper_bound
 
 ## Hipotezy
 
+### Test parametryczny - średnia urodzenia to 1960
+
+```{r a}
+birth_year_data <- data$birth_year
+
+t.test(birth_year_data, mu = 1960)
+```
+### Test parametryczny - ludzie urodzeni w 1960 wydają więcej niż ludzie urodzeni 1970
+
+```{r b}
+spent_1960 = data[data$birth_year == 1960,]$spent
+spent_1970 = data[data$birth_year == 1970,]$spent
+
+t.test(spent_1960, spent)
+```
+### Test nieparametryczny 1
+
+### Test nieparamteryczny 2
 
 
 ## Regresja liniowa
