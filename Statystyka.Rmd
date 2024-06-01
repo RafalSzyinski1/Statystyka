@@ -174,9 +174,9 @@ ggplot() +
   geom_point(data=data.frame(x=spent, y=norm), aes(x, y), color="red") + 
   geom_vline(xintercept=threashold) +
   labs(
-    title = "Prawdopodobieństwo wydatków ludzi urodzonych w 1929",
+    title = "Wykres gęstości wydatków ludzi urodzonych w 1929",
     x = "Wydatki",
-    y = "Prawdopodobieństwo"
+    y = "Gęstość"
   ) +
   theme_minimal()
 ```
@@ -186,33 +186,76 @@ ggplot() +
 ### Gerenowanie prób losowych
 
 ```{r random_sample}
-x <- data$card_year
+x <- sort(data$birth_year)
 mean_x <- mean(x)
 sd_x <- sd(x)
 
 continuous_dnorm <- dnorm(x, mean_x, sd_x)
 continuous_pnorm <- pnorm(x, mean_x, sd_x)
 
-discreet_dbinom <- dbinom(x, length(x), 0.085)
-discreet_pbinom <- pbinom(x, length(x), 0.085)
+discreet_dbinom <- dbinom(x, length(x), mean_x / length(x))
+discreet_pbinom <- pbinom(x, length(x), mean_x / length(x))
+```
+
+### Obliczanie prawdopodobieńśtwa punktowego i przedziałowego
+
+```{r probability}
+x_point <- 1969
+n <- last(which(x == x_point))
+point <- continuous_dnorm[n]
+interval <- continuous_pnorm[n]
+point
+interval
 ```
 
 ### Wykres ciągły
 
 ```{r continuous_probability_plot}
 ggplot() +
-  geom_line(data=data.frame(x=x, y=continuous_dnorm), aes(x, y))
+  geom_line(data=data.frame(x=x, y=continuous_dnorm), aes(x, y)) +
+  geom_polygon(
+    data=data.frame(
+      x=c(min(x), head(x, n), x_point), 
+      y=c(0, head(continuous_dnorm, n), 0)), 
+    aes(x, y),
+    fill = "coral1"
+    ) +
+  labs(
+    title = "Wykres gęstości roku urodzenia",
+    subtitle = sprintf("Zaznaczono P(X >= %i)", x_point),
+    x = "Rok urodzenia",
+    y = "Gęstość"
+  )
+
 ggplot() + 
-  geom_line(data=data.frame(x=x, y=continuous_pnorm), aes(x, y))
+  geom_line(data=data.frame(x=x, y=continuous_pnorm), aes(x, y)) +
+  geom_vline(xintercept = x_point, color="red") +
+  labs(
+    title = "Dystrybuanta roku urodzenia",
+    subtitle = sprintf("Zaznaczono P(X >= %i)", x_point),
+    x = "Rok urodzenia",
+    y = "Wartość dystrybuanty"
+  )
+  
 ```
 
 ### Wykres dyskretny
 
 ```{r discreet_probability_plot}
 ggplot() +
-  geom_point(data=data.frame(x=x, y=discreet_dbinom), aes(x, y))
+  geom_point(data=data.frame(x=x, y=discreet_dbinom), aes(x, y)) +
+  labs(
+    title = "Rozkład dyskretny funkcji gęstości dla roku urodzenia",
+    x = "Rok urodzenia",
+    y = "Gęstość"
+  )
 ggplot() + 
-  geom_point(data=data.frame(x=x, y=discreet_pbinom), aes(x, y))
+  geom_point(data=data.frame(x=x, y=discreet_pbinom), aes(x, y)) +
+  labs(
+    title = "Rozkład dyskretny dystrybuanty dla roku urodzenia",
+    x = "Rok urodzenia",
+    y = "Wartość dystrybuanty"
+  )
 ```
 
 ## Macierz
