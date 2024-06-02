@@ -1,6 +1,6 @@
 ---
 title: "Statystyka"
-author: "Rafał Szyiński, Kajetan Leszak"
+author: "Rafał Szyiński 259380, Kajetan Leszak"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -9,20 +9,48 @@ output: pdf_document
 
 ## Wstęp
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+Do wykonywania projektu będziemy używać dwóch bibliotek:
+
+* *ggplot2* - biblioteka do rysowania wykresów
+* *dplyr* - biblioteka do manipulowania danymi (np. filtrowanie, grupowanie itp.)
+
+**Uwaga: Jeśli komendy nie działają należy pobrać poszczególne biblioteki używając komendy `install.packages("packageName")` w konsoli.**
+
 ```{r libs}
 library(ggplot2)
-library(readr)
 library(dplyr)
 ```
 
 ## Opis baza danych
 
-- Baza pochodzi z eportal
-- Baza danych składa się z ...
-- Opis poszczególnych kolumn
+Baza **credit_card.xls** pochodzi z eportalu. Zawiera ona dane o użytkownikach kart kredytowych oraz wykonywanych przez nie transakcji.
+
+Baza posiada 26280 rekordów opisane przez 13 kolumn, które mówią nam o:
+
+* *custid* - id indywidualnego klienta
+* *date_birth* - data urodzenie danego klienta
+* *birth_year* - rok urodzenia danego klienta
+* *gender* - płeć danego klienta (dostępne opcje: Female, Male)
+* *card* - typ używanej karty kredytowej (dostępne opcje: Mastercard, Visa, American Express, Discover, Other)
+* *card_data* - data utworzenia karty kredytowej
+* *card_year* - rok utworzenia karty kredytowej
+* *month* - miesiąc w którym karta została użyta (dostępne opcje: January, Febuary, March, April, May, June, July, August, September, October, November, December)
+* *quarter* - kwartał w którym karta została użyta (dostępne opcje: Q1, Q2, Q3, Q4)
+* *year* - rok w którym karta została użyta
+* *type_trans* - rodzaj dobra, które zostało zakupione (dostępne opcje: Entertainment, Grocery, Retail, Trabel, Other)
+* *items* - ilość kupionego dobra
+* *spent* - wartość kupionego dobra
 
 ```{r db_load}
 data <- read.csv2("credit_card.xls");
+dim(data) # Rozmiary bazy danych [wiersze x kolumny]
+colnames(data) # Wypisanie nazw kolumn
+summary(data) # Podstawowe statystyki z każdej kolumny
+glimpse(data) # Przykładowe dane, które występują w każdej kolumnie
 ```
 
 ## Wyliczenie podstawowych statystyk
@@ -118,7 +146,7 @@ Będziemy obserwować wydatki osób w zależności od ich wieku
 
 ### Przygotowanie danych
 
-```{r data_prep}
+```{r data_prep_outliers}
 user_data = 
   data.frame(year=data$birth_year, spent=data$spent) %>%
   group_by(year) %>% 
@@ -136,7 +164,7 @@ user_data =
 
 ### Wykres pudełko-wąsy
 
-```{r values}
+```{r values_boxwhisker}
 outliers_1929 <- data[data$birth_year == 1929,]$spent
 outliers_1929 <- outliers_1929[outliers_1929 > user_data[user_data$year == 1929,]$upper_whisker]
 outliers_1929
@@ -159,7 +187,7 @@ ggplot() +
 
 ### Odchylenie standardowe
 
-```{r values}
+```{r values_density}
 spent = data[data$birth_year == 1929,]$spent
 data_1929 = user_data[user_data$year == 1929,]
 norm <- dnorm(spent, data_1929$mean, data_1929$sd)
@@ -343,7 +371,7 @@ t.test(spent_1960, spent)
 
 Powtórzony kod z wykresu liniowego
 
-```{r data_prep}
+```{r data_prep_regresion}
 user_data <- data[data$custid == "8257-BKBEDP-MRF",]
 
 month_numeric <- c("January", "February", "March", "April","May", "June", "July", "August", "September", "October", "November", "December" )
