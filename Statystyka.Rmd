@@ -5,10 +5,6 @@ date: "`r Sys.Date()`"
 output: 
   pdf_document:
     number_sections: true
-header-includes:
-  - \usepackage[utf8]{inputenc} 
-  - \usepackage[L7x]{fontenc}
-  - \usepackage[polish]{babel}
 ---
 
 # Wstęp
@@ -96,9 +92,9 @@ ggplot() + # Podstawa do rysowania wykresu
     stat="identity" # Zlicza sumaryczną ilość dobra
     ) +
   labs( # Podpisy na wykresie
-    title="Wykres słupkowy dla zakupu rodzaju dobra w zależności od płci",
+    title="Wykres slupkowy dla zakupu rodzaju dobra w zaleznosci od plci",
     x="Rodzaj dobra",
-    y="Sumaryczna ilość produktów"
+    y="Sumaryczna ilosc produktow"
     ) +
   theme_classic() # Ustawianie klasycznego wyglądu wykresu
 ```
@@ -154,7 +150,7 @@ ggplot() +
     color = "chartreuse3",
     linewidth = 1
     ) + 
-  scale_x_continuous( # Przygotowanie podpisów osi x
+  scale_x_continuous(
     breaks=seq(from=1, to=data_length, by=5), 
     labels=c(
       paste(rep(2007, 12),
@@ -165,11 +161,10 @@ ggplot() +
             sep="-"))
     ) +
   labs(
-    title = "Wydatki użytkownika 8257-BKBEDP-MRF względem czasu",
+    title = "Wydatki uzytkownika 8257-BKBEDP-MRF wzgledem czasu",
     x = NULL,
     y = "Sumaryczne wydatki"
   ) +
-   # Ustawienie wyglądu osi X aby był obrócony o 30 stopni
   theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
 
 ```
@@ -195,9 +190,9 @@ ggplot() +
     stat="count", # Zliczanie wystąpień 
     fill="lightblue") +
   labs(
-    title = "Histogram typu używanych kart",
+    title = "Histogram typu uzywanych kart",
     x = "Typ karty",
-    y = "Ilość użycia"
+    y = "Ilosc uzycia"
     ) +
   theme_minimal() # Motyw minimalistyczny
 ```
@@ -212,69 +207,89 @@ Wykres gęstości i pudełko-wąsy są używane w dalszej części projektu.
 
 # Obserwacje odstające
 
-Będziemy obserwować wydatki osób w zależności od ich wieku
+Obserwacje odstające to punkty danych, które znacząco różnią się od innych obserwacji w zestawie danych.
 
-## Przygotowanie danych
+**Problem:**
 
-```{r data_prep_outliers}
-user_data = 
-  data.frame(year=data$birth_year, spent=data$spent) %>%
-  group_by(year) %>% 
-  summarize(
-    total_spent=sum(spent),
-    q1 = quantile(spent, 0.25),
-    median = median(spent),
-    q3 = quantile(spent, 0.75),
-    lower_whisker = max(min(spent), q1 - 1.5 * (q3 - q1)),
-    upper_whisker = min(max(spent), q3 + 1.5 * (q3 - q1)),
-    mean = mean(spent),
-    sd = sd(spent)
-  )
-```
+* Wyznacz dane odstające w wydatkach dla osób urodzonych w 1929.
+* Pokaż dane odstające w wydatkach dla każdego wieku użytkownika.
 
 ## Wykres pudełko-wąsy
 
+Wykres pudełko-wąsy składa się z kilku kluczowych elementów, które pomagają wizualizować różne aspekty zestawu danych, t.j.:
+
+* *Mediana* - Linia wewnątrz pudełka, która przedstawia środkową wartość danych.
+* *Pudełko* - Prostokąt, który rozciąga się od pierwszego kwartyla ($Q1$) do trzeciego kwartyla ($Q3$). Obejmuje środkowe 50% danych.
+* *Wąsy* - Linie wychodzące z pudełka, które sięgają do najmniejszej i największej wartości w obrębie zasięgu $Q1 − 1.5 \cdot IQR$ i $Q3 + 1.5 \cdot IQR$, gdzie $IQR$ to rozstęp między kwartylowy ($Q3 - Q1$).
+* *Obserwacje odstające* - Punkty znajdujące się poza wąsami, które są wartościami ekstremalnymi w zestawie danych (dane które będziemy wyznaczać w tym zadaniu).
+
 ```{r values_boxwhisker}
-outliers_1929 <- data[data$birth_year == 1929,]$spent
-outliers_1929 <- outliers_1929[outliers_1929 > user_data[user_data$year == 1929,]$upper_whisker]
+# Wszystkie wydatki osób urodzonych w 1929
+spent_1929 <- data[data$birth_year == 1929,]$spent
+
+q1 <- quantile(spent_1929, 0.25) # Pierwszy kwartyl
+q3 <- quantile(spent_1929, 0.75) # Ostatni kwartyl
+    
+# Wartość dolnego "wąsa"
+lower_whisker <- max(min(spent_1929), q1 - 1.5 * (q3 - q1))
+# Wartość górnego "wąsa"
+upper_whisker <- min(max(spent_1929), q3 + 1.5 * (q3 - q1))
+
+# Obserwacje odstające 
+outliers_1929 <- spent_1929[spent_1929 > upper_whisker | 
+                              spent_1929 < lower_whisker]
 outliers_1929
 ```
 
 ```{r plot_boxwhisker}
 ggplot() +
-  geom_boxplot(
+  geom_boxplot( # Wykres pudełko-wąsy
     data=data, 
     aes(x=birth_year, y=spent, group=birth_year),
     color="cadetblue"
     ) +
   labs(
-    title = "Wykres pudełko-wąsy dla wydatków w zależności od wieku osoby",
+    title = "Wykres pudelko-wasy dla wydatkow w zaleznosci od wieku osoby",
     x = "Rok urodzenia",
     y = "Wydaki",
     ) +
   theme_bw()
 ```
 
+**Interpretacja wyników:**
+
+* Dla osób urodzonych w 1929 wartość obserwacji dostających zaczynają się od 880.82 i jest ich 11
+* Nie ma wyników odstających które są mniejsze niż 0.0
+
 ## Odchylenie standardowe
 
 ```{r values_density}
-spent = data[data$birth_year == 1929,]$spent
-data_1929 = user_data[user_data$year == 1929,]
-norm <- dnorm(spent, data_1929$mean, data_1929$sd)
-threashold <- data_1929$mean + 3 * data_1929$sd
-outliers_1929 <- spent[spent > threashold]
+# Wszystkie wydatki osób urodzonych w 1929
+spent_1929 <- data[data$birth_year == 1929,]$spent
+mean_spent_1929 <- mean(spent_1929) # Średnia
+sd_spent_1929 <- sd(spent_1929) # Odchylenie standardowe
+
+# Funkcja gęstości na podstawie wydatków
+norm_spent_1929 <- dnorm(spent_1929, mean_spent_1929, sd_spent_1929)
+
+# Górna granica 
+upper_threashold <- mean_spent_1929 + 3 * sd_spent_1929
+lower_threashold <- mean_spent_1929 - 3 * sd_spent_1929
+outliers_1929 <- spent_1929[spent_1929 > upper_threashold | 
+                         spent_1929 < lower_threashold]
 outliers_1929
 ```
 
 ```{r plot_density}
 ggplot() +
-  geom_line(data=data.frame(x=spent, y=norm), aes(x, y)) +
-  geom_point(data=data.frame(x=spent, y=norm), aes(x, y), color="red") + 
-  geom_vline(xintercept=threashold) +
+  geom_line(data=data.frame(x=spent_1929, y=norm_spent_1929), aes(x, y)) +
+  geom_point(data=data.frame(x=spent_1929, y=norm_spent_1929), aes(x, y), color="red") + 
+  geom_vline(xintercept=upper_threashold) +
   labs(
-    title = "Wykres gęstości wydatków ludzi urodzonych w 1929",
+    title = "Wykres gestosci wydatkow ludzi urodzonych w 1929",
+    subtitle = sprintf("Linia okreslajaca wartosci odstajace: x=%.02f", upper_threashold),
     x = "Wydatki",
-    y = "Gęstość"
+    y = "Gestosc"
   ) +
   theme_minimal()
 ```
@@ -319,10 +334,10 @@ ggplot() +
     fill = "coral1"
     ) +
   labs(
-    title = "Wykres gęstości roku urodzenia",
+    title = "Wykres gestosci roku urodzenia",
     subtitle = sprintf("Zaznaczono P(X >= %i)", x_point),
     x = "Rok urodzenia",
-    y = "Gęstość"
+    y = "Gestosc"
   )
 
 ggplot() + 
@@ -332,7 +347,7 @@ ggplot() +
     title = "Dystrybuanta roku urodzenia",
     subtitle = sprintf("Zaznaczono P(X >= %i)", x_point),
     x = "Rok urodzenia",
-    y = "Wartość dystrybuanty"
+    y = "Wartosc dystrybuanty"
   )
   
 ```
@@ -428,7 +443,7 @@ t.test(birth_year_data, mu = 1960)
 spent_1960 = data[data$birth_year == 1960,]$spent
 spent_1970 = data[data$birth_year == 1970,]$spent
 
-t.test(spent_1960, spent)
+t.test(spent_1960, spent_1970)
 ```
 ## Test nieparametryczny 1
 
