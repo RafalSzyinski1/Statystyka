@@ -1,16 +1,21 @@
 ---
 title: "Statystyka"
-author: "Rafał Szyiński 259380, Kajetan Leszak"
+author: "Rafał Szyiński 259380, Kajetan Leszak 259321"
 date: "`r Sys.Date()`"
-output: pdf_document
+output: 
+  pdf_document:
+    number_sections: true
+header-includes:
+  - \usepackage[utf8]{inputenc} 
+  - \usepackage[L7x]{fontenc}
+  - \usepackage[polish]{babel}
 ---
 
-# Statystyka
-
-## Wstęp
+# Wstęp
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+Sys.setlocale("LC_ALL", "Poland")
 ```
 
 Do wykonywania projektu będziemy używać dwóch bibliotek:
@@ -18,16 +23,16 @@ Do wykonywania projektu będziemy używać dwóch bibliotek:
 * *ggplot2* - biblioteka do rysowania wykresów
 * *dplyr* - biblioteka do manipulowania danymi (np. filtrowanie, grupowanie itp.)
 
-**Uwaga: Jeśli komendy nie działają należy pobrać poszczególne biblioteki używając komendy `install.packages("packageName")` w konsoli.**
-
 ```{r libs}
 library(ggplot2)
 library(dplyr)
 ```
 
-## Opis baza danych
+**Uwaga: Jeśli komendy nie działają należy pobrać poszczególne biblioteki używając komendy `install.packages("packageName")` w konsoli.**
 
-Baza **credit_card.xls** pochodzi z eportalu. Zawiera ona dane o użytkownikach kart kredytowych oraz wykonywanych przez nie transakcji.
+# Opis baza danych
+
+Baza **credit_card.xls** pochodzi z eportalu. Zawiera ona dane o użytkownikach kart kredytowych oraz wykonywanych przez nich transakcjach.
 
 Baza posiada 26280 rekordów opisane przez 13 kolumn, które mówią nam o:
 
@@ -53,40 +58,79 @@ summary(data) # Podstawowe statystyki z każdej kolumny
 glimpse(data) # Przykładowe dane, które występują w każdej kolumnie
 ```
 
-## Wyliczenie podstawowych statystyk
+# Wyliczenie podstawowych statystyk
 
-Statysyka będzie wyliczona z columny items i spent
+Do obliczenia podstawowych statystyk używa się funkcji `summary()`, która wylicza:
+
+* *Min.* - Wartość minimalną
+* *1st Qu.* - Wartość pierwszego kwartylu (25% wyników jest poniżej tej wartości)
+* *Median* - Wartość mediany
+* *Mean* - Wartość średnia
+* *3rd Qu.* - Wartość trzeciego kwartylu
+* *Max.* - Wartość maksymalną (75% wyników jest poniżej tej wartości) 
 
 ```{r summary_items_spent}
-frame <- data.frame(
-  items_summary=unclass(summary(data$items)),
-  spent_summary=unclass(summary(data$spent))
-  )
-frame
+summary(data$items) # Podstawowe statystyki dla kolumny items
+summary(data$spent) # Podstawowe statystyki dla kolumny spent
 ```
+**Interpretacja wyników:**
 
-## Wykresy
+* Pierwszy kwartyl jest równy zero dla obu przypadków co oznacza że więcej niż 25% wyników jest równa zero
+
+# Wykresy
+
+## Wykres słupkowy
+
+**Problem:**
+
+Jak dużo konkretnego dobra (z kolumny *type_trans*) jest kupowane w zależności od płci.
 
 ```{r plot_box}
-ggplot() + 
-  geom_bar(
-    data=data, 
+ggplot() + # Podstawa do rysowania wykresu
+  geom_bar( # Wykres słupkowy
+    data=data,  # Używane dane do rysowania
+    # Określanie jake dane są na konkretnej osi 
+    # (x - typ dobra, y - sumaryczna ilość, 
+    # color i fill = podział względem płci) 
     aes(x=type_trans, y=items, color=gender, fill=gender), 
-    stat="identity"
+    stat="identity" # Zlicza sumaryczną ilość dobra
     ) +
-  labs(
+  labs( # Podpisy na wykresie
     title="Wykres słupkowy dla zakupu rodzaju dobra w zależności od płci",
     x="Rodzaj dobra",
-    y="Sumaryczna ilość zakupionych produktów"
+    y="Sumaryczna ilość produktów"
     ) +
-  theme_classic()
+  theme_classic() # Ustawianie klasycznego wyglądu wykresu
 ```
+
+**Interpretacja wyników:**
+
+* Kobiety kupują więcej dóbr niż mężczyźni
+* Najwięcej transakcji występuje w sprzedaży detalicznej
+* Najmniej transakcji jest na podróże
+
+## Wykres liniowy
+
+**Problem:**
+
+Jaki jest sumaryczny wydatek danego użytkownika (8257-BKBEDP-MRF) względem czasu (podział na rok i miesiąc)
 
 ```{r plot_linear}
 # Filtrujemy wysztkie dane pierwszego użytkownika
 user_data <- data[data$custid == "8257-BKBEDP-MRF",]
 
-month_numeric <- c("January", "February", "March", "April","May", "June", "July", "August", "September", "October", "November", "December" )
+month_numeric <- c("January", 
+                   "February", 
+                   "March", 
+                   "April",
+                   "May", 
+                   "June", 
+                   "July", 
+                   "August", 
+                   "September", 
+                   "October", 
+                   "November", 
+                   "December")
 
 # Zamiana miesiąca z słowa na liczbe np. January=1
 month <- match(user_data$month, month_numeric)
@@ -99,52 +143,78 @@ user_date_spent = data.frame(
 
 # Sortowanie po roku i miesiącu
 sorted_user <- user_date_spent[order(user_date_spent$year, user_date_spent$month),]
-# Sumaryczny wektor 
+# Sumaryczny wektor wydatków
 sorted_user$spent <- cumsum(sorted_user$spent)
-data_length = length(sorted_user$spent)
+data_length <- length(sorted_user$spent)
 
 ggplot() +
-  geom_line(
+  geom_line( # Wykres liniowy
     data=sorted_user, 
     aes(x = seq(from=1, to=data_length), y = spent),
     color = "chartreuse3",
     linewidth = 1
     ) + 
-  scale_x_continuous(
-    breaks= seq(from=1, to=data_length, by=5), 
-    labels=c(paste(rep(2007, 12), month_numeric, sep="-"), paste(rep(2008, 12), month_numeric, sep="-"))
+  scale_x_continuous( # Przygotowanie podpisów osi x
+    breaks=seq(from=1, to=data_length, by=5), 
+    labels=c(
+      paste(rep(2007, 12),
+            month_numeric, 
+            sep="-"), 
+      paste(rep(2008, 12), 
+            month_numeric, 
+            sep="-"))
     ) +
   labs(
     title = "Wydatki użytkownika 8257-BKBEDP-MRF względem czasu",
     x = NULL,
     y = "Sumaryczne wydatki"
   ) +
+   # Ustawienie wyglądu osi X aby był obrócony o 30 stopni
   theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
 
 ```
 
-```{r plot_histogram}
+**Interpretacja wyników:**
 
+* Użytkownik sumarycznie wydał 36330.45
+* Użytkownik używał karty tylko przez 2 lata
+* Wydatki użytkownika są w miarę stałe (wykres ten jest używany do regresji linowej [ostatni podpunkt projektu], w którym możemy sprawdzić jak bardzo wydatki odstają od stałych)
+* Robiąc pochodną wykresu, można określić miesiąc w którym użytkownik wydał najwięcej: $max\left( \frac{d}{dx} f(x) \right)$
+
+## Histogram
+
+**Problem:**
+
+Jaki typ karty jest najczęściej używany.
+
+```{r plot_histogram}
 ggplot() +
-  geom_histogram(
+  geom_histogram( # Histogram
     data=data, 
     aes(x=card), 
-    stat="count", 
+    stat="count", # Zliczanie wystąpień 
     fill="lightblue") +
   labs(
     title = "Histogram typu używanych kart",
     x = "Typ karty",
     y = "Ilość użycia"
     ) +
-  theme_minimal()
-
+  theme_minimal() # Motyw minimalistyczny
 ```
 
-## Obserwacje odstające
+**Interpretacja wyników:**
+
+* Najczęściej używaną kartą jest Mastercard.
+
+## Inne wykresy
+
+Wykres gęstości i pudełko-wąsy są używane w dalszej części projektu.
+
+# Obserwacje odstające
 
 Będziemy obserwować wydatki osób w zależności od ich wieku
 
-### Przygotowanie danych
+## Przygotowanie danych
 
 ```{r data_prep_outliers}
 user_data = 
@@ -162,7 +232,7 @@ user_data =
   )
 ```
 
-### Wykres pudełko-wąsy
+## Wykres pudełko-wąsy
 
 ```{r values_boxwhisker}
 outliers_1929 <- data[data$birth_year == 1929,]$spent
@@ -185,7 +255,7 @@ ggplot() +
   theme_bw()
 ```
 
-### Odchylenie standardowe
+## Odchylenie standardowe
 
 ```{r values_density}
 spent = data[data$birth_year == 1929,]$spent
@@ -209,9 +279,9 @@ ggplot() +
   theme_minimal()
 ```
 
-## Wyliczenie prawdopodobieństwa dla zmiennej
+# Wyliczenie prawdopodobieństwa dla zmiennej
 
-### Gerenowanie prób losowych
+## Gerenowanie prób losowych
 
 ```{r random_sample}
 x <- sort(data$birth_year)
@@ -225,7 +295,7 @@ discreet_dbinom <- dbinom(x, length(x), mean_x / length(x))
 discreet_pbinom <- pbinom(x, length(x), mean_x / length(x))
 ```
 
-### Obliczanie prawdopodobieńśtwa punktowego i przedziałowego
+## Obliczanie prawdopodobieńśtwa punktowego i przedziałowego
 
 ```{r probability}
 x_point <- 1969
@@ -236,7 +306,7 @@ point
 interval
 ```
 
-### Wykres ciągły
+## Wykres ciągły
 
 ```{r continuous_probability_plot}
 ggplot() +
@@ -267,7 +337,7 @@ ggplot() +
   
 ```
 
-### Wykres dyskretny
+## Wykres dyskretny
 
 ```{r discreet_probability_plot}
 ggplot() +
@@ -286,7 +356,7 @@ ggplot() +
   )
 ```
 
-## Macierz
+# Macierz
 
 ```{r matrix}
 matrix <- matrix(data$card_year) %>% cbind(data$items) %>% cbind(data$spent)
@@ -302,9 +372,9 @@ matrix_data = list(
 matrix_data
 ```
 
-## Przedziały ufności
+# Przedziały ufności
 
-### Zmienna numeryczna
+## Zmienna numeryczna
 
 ```{r numeric_confidence_intervals}
 x <- data$items
@@ -323,7 +393,7 @@ lower_bound
 upper_bound
 ```
 
-### Zmienna jakościowa
+## Zmienna jakościowa
 
 Przedział ufności Walda
 
@@ -343,16 +413,16 @@ lower_bound
 upper_bound
 ```
 
-## Hipotezy
+# Hipotezy
 
-### Test parametryczny - średnia urodzenia to 1960
+## Test parametryczny - średnia urodzenia to 1960
 
 ```{r a}
 birth_year_data <- data$birth_year
 
 t.test(birth_year_data, mu = 1960)
 ```
-### Test parametryczny - ludzie urodzeni w 1960 wydają więcej niż ludzie urodzeni 1970
+## Test parametryczny - ludzie urodzeni w 1960 wydają więcej niż ludzie urodzeni 1970
 
 ```{r b}
 spent_1960 = data[data$birth_year == 1960,]$spent
@@ -360,14 +430,14 @@ spent_1970 = data[data$birth_year == 1970,]$spent
 
 t.test(spent_1960, spent)
 ```
-### Test nieparametryczny 1
+## Test nieparametryczny 1
 
-### Test nieparamteryczny 2
+## Test nieparamteryczny 2
 
 
-## Regresja liniowa
+# Regresja liniowa
 
-### Przygotowanie danych
+## Przygotowanie danych
 
 Powtórzony kod z wykresu liniowego
 
@@ -395,7 +465,7 @@ model <- lm(sorted_user$spent ~ x)
 y <- model$coefficients[2] * x + model$coefficients[1]
 ```
 
-### Wykres
+## Wykres
 
 ```{r plot_linear_regresion}
 ggplot() +
