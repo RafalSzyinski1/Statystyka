@@ -11,13 +11,12 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-Sys.setlocale("LC_ALL", "Poland")
 ```
 
 Do wykonywania projektu będziemy używać dwóch bibliotek:
 
-* *ggplot2* - biblioteka do rysowania wykresów
-* *dplyr* - biblioteka do manipulowania danymi (np. filtrowanie, grupowanie itp.)
+* *ggplot2* - biblioteka do rysowania wykresów.
+* *dplyr* - biblioteka do manipulowania danymi (np. filtrowanie, grupowanie itp.).
 
 ```{r libs}
 library(ggplot2)
@@ -32,19 +31,19 @@ Baza **credit_card.xls** pochodzi z eportalu. Zawiera ona dane o użytkownikach 
 
 Baza posiada 26280 rekordów opisane przez 13 kolumn, które mówią nam o:
 
-* *custid* - id indywidualnego klienta
-* *date_birth* - data urodzenie danego klienta
-* *birth_year* - rok urodzenia danego klienta
-* *gender* - płeć danego klienta (dostępne opcje: Female, Male)
-* *card* - typ używanej karty kredytowej (dostępne opcje: Mastercard, Visa, American Express, Discover, Other)
-* *card_data* - data utworzenia karty kredytowej
-* *card_year* - rok utworzenia karty kredytowej
-* *month* - miesiąc w którym karta została użyta (dostępne opcje: January, Febuary, March, April, May, June, July, August, September, October, November, December)
-* *quarter* - kwartał w którym karta została użyta (dostępne opcje: Q1, Q2, Q3, Q4)
-* *year* - rok w którym karta została użyta
-* *type_trans* - rodzaj dobra, które zostało zakupione (dostępne opcje: Entertainment, Grocery, Retail, Trabel, Other)
-* *items* - ilość kupionego dobra
-* *spent* - wartość kupionego dobra
+* *custid* - id indywidualnego klienta.
+* *date_birth* - data urodzenie danego klienta.
+* *birth_year* - rok urodzenia danego klienta.
+* *gender* - płeć danego klienta (dostępne opcje: Female, Male).
+* *card* - typ używanej karty kredytowej (dostępne opcje: Mastercard, Visa, American Express, Discover, Other).
+* *card_data* - data utworzenia karty kredytowej.
+* *card_year* - rok utworzenia karty kredytowej.
+* *month* - miesiąc w którym karta została użyta (dostępne opcje: January, Febuary, March, April, May, June, July, August, September, October, November, December).
+* *quarter* - kwartał w którym karta została użyta (dostępne opcje: Q1, Q2, Q3, Q4).
+* *year* - rok w którym karta została użyta.
+* *type_trans* - rodzaj dobra, które zostało zakupione (dostępne opcje: Entertainment, Grocery, Retail, Trabel, Other).
+* *items* - ilość kupionego dobra.
+* *spent* - wartość kupionego dobra.
 
 ```{r db_load}
 data <- read.csv2("credit_card.xls");
@@ -58,12 +57,12 @@ glimpse(data) # Przykładowe dane, które występują w każdej kolumnie
 
 Do obliczenia podstawowych statystyk używa się funkcji `summary()`, która wylicza:
 
-* *Min.* - Wartość minimalną
-* *1st Qu.* - Wartość pierwszego kwartylu (25% wyników jest poniżej tej wartości)
-* *Median* - Wartość mediany
-* *Mean* - Wartość średnia
-* *3rd Qu.* - Wartość trzeciego kwartylu
-* *Max.* - Wartość maksymalną (75% wyników jest poniżej tej wartości) 
+* *Min.* - Wartość minimalną.
+* *1st Qu.* - Wartość pierwszego kwartylu (25% wyników jest poniżej tej wartości).
+* *Median* - Wartość mediany.
+* *Mean* - Wartość średnia.
+* *3rd Qu.* - Wartość trzeciego kwartylu.
+* *Max.* - Wartość maksymalną (75% wyników jest poniżej tej wartości).
 
 ```{r summary_items_spent}
 summary(data$items) # Podstawowe statystyki dla kolumny items
@@ -71,7 +70,7 @@ summary(data$spent) # Podstawowe statystyki dla kolumny spent
 ```
 **Interpretacja wyników:**
 
-* Pierwszy kwartyl jest równy zero dla obu przypadków co oznacza że więcej niż 25% wyników jest równa zero
+* Pierwszy kwartyl jest równy zero dla obu przypadków co oznacza że więcej niż 25% wyników jest równa zero.
 
 # Wykresy
 
@@ -101,15 +100,15 @@ ggplot() + # Podstawa do rysowania wykresu
 
 **Interpretacja wyników:**
 
-* Kobiety kupują więcej dóbr niż mężczyźni
-* Najwięcej transakcji występuje w sprzedaży detalicznej
-* Najmniej transakcji jest na podróże
+* Kobiety kupują więcej dóbr niż mężczyźni.
+* Najwięcej transakcji występuje w sprzedaży detalicznej.
+* Najmniej transakcji jest na podróże.
 
 ## Wykres liniowy
 
 **Problem:**
 
-Jaki jest sumaryczny wydatek danego użytkownika (8257-BKBEDP-MRF) względem czasu (podział na rok i miesiąc)
+Jaki jest sumaryczny wydatek danego użytkownika (8257-BKBEDP-MRF) względem czasu (podział na rok i miesiąc).
 
 ```{r plot_linear}
 # Filtrujemy wysztkie dane pierwszego użytkownika
@@ -171,10 +170,10 @@ ggplot() +
 
 **Interpretacja wyników:**
 
-* Użytkownik sumarycznie wydał 36330.45
-* Użytkownik używał karty tylko przez 2 lata
-* Wydatki użytkownika są w miarę stałe (wykres ten jest używany do regresji linowej [ostatni podpunkt projektu], w którym możemy sprawdzić jak bardzo wydatki odstają od stałych)
-* Robiąc pochodną wykresu, można określić miesiąc w którym użytkownik wydał najwięcej: $max\left( \frac{d}{dx} f(x) \right)$
+* Użytkownik sumarycznie wydał 36330.45.
+* Użytkownik używał karty tylko przez 2 lata.
+* Wydatki użytkownika są w miarę stałe (wykres ten jest używany do regresji linowej [ostatni podpunkt projektu], w którym możemy sprawdzić jak bardzo wydatki odstają od stałych).
+* Robiąc pochodną wykresu, można określić miesiąc w którym użytkownik wydał najwięcej: $max\left( \frac{d}{dx} f(x) \right)$.
 
 ## Histogram
 
@@ -258,10 +257,16 @@ ggplot() +
 
 **Interpretacja wyników:**
 
-* Dla osób urodzonych w 1929 wartość obserwacji dostających zaczynają się od 880.82 i jest ich 11
-* Nie ma wyników odstających które są mniejsze niż 0.0
+* Dla osób urodzonych w 1929 wartość obserwacji dostających zaczynają się od 880.82 i jest ich 11.
+* Nie ma wyników odstających które są mniejsze niż 0.0, ponieważ pierwszy kwartyl jest równy zero.
+* Większość wydatków jest mniejsza niż 500.
 
 ## Odchylenie standardowe
+
+Wykres gęstości pokazuje, gdzie wartości są najbardziej skoncentrowane. Obszar pod krzywą jest równy 1, co oznacza, że wykres gęstości przedstawia rozkład prawdopodobieństwa danej zmiennej.
+
+Obserwacje mogą być uznane za odstające, jeśli znajdują się poza określoną liczbą odchyleń standardowych od średniej. Na przykład, dane poza granicami $\mu \pm 3 \sigma$ są często uznawane za odstające, ponieważ poza tą wartością znajdują się około $0.1%$ danych.
+
 
 ```{r values_density}
 # Wszystkie wydatki osób urodzonych w 1929
@@ -277,6 +282,8 @@ upper_threashold <- mean_spent_1929 + 3 * sd_spent_1929
 lower_threashold <- mean_spent_1929 - 3 * sd_spent_1929
 outliers_1929 <- spent_1929[spent_1929 > upper_threashold | 
                          spent_1929 < lower_threashold]
+mean_spent_1929 + sd_spent_1929
+mean_spent_1929 - sd_spent_1929
 outliers_1929
 ```
 
@@ -294,31 +301,50 @@ ggplot() +
   theme_minimal()
 ```
 
+**Interpretacja wyników:**
+
+* Dla osób urodzonych w 1929 wartość obserwacji dostających zaczynają się od 1026.36 i jest ich 7.
+* Nie ma wartości dostających mniejszych od 0 dla osób urodzonych w 1929.
+* Średnia wydatków dla osób urodzonych w 1929 wynosi 292.0854.
+* Około 66% wartości wydatków dla osób urodzonych w 1929 znajdują się pomiędzy wartościami 48.3 a 535.86 ($\mu \pm \sigma$).
+
 # Wyliczenie prawdopodobieństwa dla zmiennej
 
 ## Gerenowanie prób losowych
 
 ```{r random_sample}
-x <- sort(data$birth_year)
+x <- sort(data$birth_year) # Posortowane dane roku urodzenia
 mean_x <- mean(x)
 sd_x <- sd(x)
 
-continuous_dnorm <- dnorm(x, mean_x, sd_x)
-continuous_pnorm <- pnorm(x, mean_x, sd_x)
+# Wartości funkcji gęstości (ciągła)
+continuous_dnorm <- dnorm(x, mean_x, sd_x) 
+# Wartości dystybuanty (ciągła)
+continuous_pnorm <- pnorm(x, mean_x, sd_x) 
 
+# Wartości funkcji gęstości (dyskretna)
 discreet_dbinom <- dbinom(x, length(x), mean_x / length(x))
+# Wartości dystrybuanty (dyskretna)
 discreet_pbinom <- pbinom(x, length(x), mean_x / length(x))
 ```
 
 ## Obliczanie prawdopodobieńśtwa punktowego i przedziałowego
 
+TODO: do poprawy
+Prawdopodobieństwo punktowe powinno być równe 0 gdyż wykres pod wykresem w danych punkcie jest równe 0 dla wykresu ciągłego. Jeśli chcemy wyznaczyć prawdopodobieństwo punktowe należy skorzystać z wykresu dyskretnego, które będzie największym przybliżeniem wartości.
+
 ```{r probability}
-x_point <- 1969
-n <- last(which(x == x_point))
-point <- continuous_dnorm[n]
-interval <- continuous_pnorm[n]
-point
-interval
+x_point <- 1969 
+n <- tail(which(x == x_point),1)
+
+# Prawdopodobieństwo punktowe P(X = 1929)
+continuous_dnorm[n] 
+discreet_dbinom[n]
+
+# Prawdopodobieństwo przedziałowo P(X <= 1929)
+continuous_pnorm[n]
+discreet_pbinom[n]
+
 ```
 
 ## Wykres ciągły
