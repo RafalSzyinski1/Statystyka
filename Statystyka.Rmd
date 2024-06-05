@@ -263,9 +263,9 @@ ggplot() +
 
 ## Odchylenie standardowe
 
-Wykres gęstości pokazuje, gdzie wartości są najbardziej skoncentrowane. Obszar pod krzywą jest równy 1, co oznacza, że wykres gęstości przedstawia rozkład prawdopodobieństwa danej zmiennej.
+Wykres gęstości pokazuje, gdzie wartości są najbardziej skoncentrowane. Obszar pod całą krzywą jest równy 1, co oznacza, że wykres gęstości przedstawia rozkład prawdopodobieństwa danej zmiennej.
 
-Obserwacje mogą być uznane za odstające, jeśli znajdują się poza określoną liczbą odchyleń standardowych od średniej. Na przykład, dane poza granicami $\mu \pm 3 \sigma$ są często uznawane za odstające, ponieważ poza tą wartością znajdują się około $0.1%$ danych.
+Obserwacje mogą być uznane za odstające, jeśli znajdują się poza określoną liczbą odchyleń standardowych od średniej. Na przykład, dane poza granicami $\mu \pm 3 \sigma$ są często uznawane za odstające, ponieważ poza tą wartością znajdują się około $0.1\%$ danych.
 
 
 ```{r values_density}
@@ -279,11 +279,11 @@ norm_spent_1929 <- dnorm(spent_1929, mean_spent_1929, sd_spent_1929)
 
 # Górna granica 
 upper_threashold <- mean_spent_1929 + 3 * sd_spent_1929
+# Dolna granica
 lower_threashold <- mean_spent_1929 - 3 * sd_spent_1929
+# Wartości odstające
 outliers_1929 <- spent_1929[spent_1929 > upper_threashold | 
                          spent_1929 < lower_threashold]
-mean_spent_1929 + sd_spent_1929
-mean_spent_1929 - sd_spent_1929
 outliers_1929
 ```
 
