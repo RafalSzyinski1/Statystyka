@@ -310,7 +310,17 @@ ggplot() +
 
 # Wyliczenie prawdopodobieństwa dla zmiennej
 
+**Problem:**
+
+* Osoby w jakim wieku używają więcej karty kredytowej.
+* Jakie jest prawdopodobieństwo używania karty przez osobę urodzoną w 1969r. ($P(X = 1969)$).
+* Jakie jest prawdopodobieństwo używania karty przez osoby urodzone do 1969r. ($P(X <= 1969)$).
+
 ## Gerenowanie prób losowych
+
+Aby wygenerować wykres ciągły gęstości należy użyć funkcji `dnorm()`, do którego należy podać dane (x), wartość średnią (mean_x) oraz odchylenie standardowe (sd_x). Analogicznie działa funkcja `pnorm()` generująca wartości dla ciągłego wykresu dystrybuanty.
+
+Aby wygenerować wykres dyskretny wykres gęstości należy użyć funkcji `dbinom()`, do którego należy podać dane (x), ilość prób, (length(x)) oraz prawdopodobieństwo sukcesu dla każdej próby (które możemy policzyć $p = \frac{\mu}{length(x)}$). Analogicznie działa funkcja `pbinom()` generująca wartości dla dyskretnego wykresu dystrybuanty.
 
 ```{r random_sample}
 x <- sort(data$birth_year) # Posortowane dane roku urodzenia
@@ -319,7 +329,7 @@ sd_x <- sd(x)
 
 # Wartości funkcji gęstości (ciągła)
 continuous_dnorm <- dnorm(x, mean_x, sd_x) 
-# Wartości dystybuanty (ciągła)
+# Wartości dystrybuanty (ciągła)
 continuous_pnorm <- pnorm(x, mean_x, sd_x) 
 
 # Wartości funkcji gęstości (dyskretna)
@@ -328,23 +338,23 @@ discreet_dbinom <- dbinom(x, length(x), mean_x / length(x))
 discreet_pbinom <- pbinom(x, length(x), mean_x / length(x))
 ```
 
-## Obliczanie prawdopodobieńśtwa punktowego i przedziałowego
+## Obliczanie prawdopodobieństwa punktowego i przedziałowego
 
-TODO: do poprawy
-Prawdopodobieństwo punktowe powinno być równe 0 gdyż wykres pod wykresem w danych punkcie jest równe 0 dla wykresu ciągłego. Jeśli chcemy wyznaczyć prawdopodobieństwo punktowe należy skorzystać z wykresu dyskretnego, które będzie największym przybliżeniem wartości.
+Prawdopodobieństwo punktowe ($P(X = x)$) powinno być równe 0 gdyż pole pod wykresem w danych punkcie jest równe 0 dla wykresu ciągłego. 
+
+Jeśli chcemy wyznaczyć prawdopodobieństwo punktowe należy skorzystać z wykresu dyskretnego, które będzie największym przybliżeniem wartości.
 
 ```{r probability}
 x_point <- 1969 
 n <- tail(which(x == x_point),1)
 
-# Prawdopodobieństwo punktowe P(X = 1929)
-continuous_dnorm[n] 
-discreet_dbinom[n]
+# Prawdopodobieństwo punktowe P(X = 1969)
+continuous_dnorm[n] # Ciągłe
+discreet_dbinom[n] # Dyskretne
 
-# Prawdopodobieństwo przedziałowo P(X <= 1929)
-continuous_pnorm[n]
-discreet_pbinom[n]
-
+# Prawdopodobieństwo przedziałowego P(X <= 1969)
+continuous_pnorm[n] # Ciągłe
+discreet_pbinom[n] # Dyskretne
 ```
 
 ## Wykres ciągły
@@ -361,7 +371,7 @@ ggplot() +
     ) +
   labs(
     title = "Wykres gestosci roku urodzenia",
-    subtitle = sprintf("Zaznaczono P(X >= %i)", x_point),
+    subtitle = sprintf("Zaznaczono P(X <= %i)", x_point),
     x = "Rok urodzenia",
     y = "Gestosc"
   )
@@ -371,7 +381,7 @@ ggplot() +
   geom_vline(xintercept = x_point, color="red") +
   labs(
     title = "Dystrybuanta roku urodzenia",
-    subtitle = sprintf("Zaznaczono P(X >= %i)", x_point),
+    subtitle = sprintf("Zaznaczono P(X <= %i)", x_point),
     x = "Rok urodzenia",
     y = "Wartosc dystrybuanty"
   )
@@ -397,12 +407,19 @@ ggplot() +
   )
 ```
 
+**Interpretacja wyników:**
+
+* Osoby urodzone około roku 1960, używają najczęściej karty kredytowej.
+* Prawdopodobieństwo, że osoba używająca karty (z próby losowej) jest urodzona w 1969 wynosi 0.0091 co jest bardzo bliskie zeru.
+* Prawdopodobieństwo, że osoba użynająca karty (z próby losowej) jest urodzona przed 1969 wynosi 0.7.
+
 # Macierz
 
 ```{r matrix}
 matrix <- matrix(data$card_year) %>% cbind(data$items) %>% cbind(data$spent)
 
 matrix_data = list(
+  is_matrix = is.matrix(matrix),
   dimension = dim(matrix),
   number_of_row = nrow(matrix),
   number_of_colum = ncol(matrix),
