@@ -415,6 +415,17 @@ ggplot() +
 
 # Macierz
 
+Macierz zbudowano z danych *card_year*, *items* i *spent*.
+Określono parametry pokazujące:
+
+* *is_matrix* - czy zmienna jest macierzą.
+* *dimension* - wymiary macierzy (wiersze i kolumny).
+* *number_of_row* - ilość wierszy.
+* *number_of_col* - ilość kolumn.
+* *sum_of_column* - suma wartości w każdej kolumnie.
+* *sum_of_first_two_row* - suma dla dwóch pierwszych wierszy.
+* *sum_of_all_elements* - suma wszystkich elementów.
+
 ```{r matrix}
 matrix <- matrix(data$card_year) %>% cbind(data$items) %>% cbind(data$spent)
 
@@ -422,7 +433,7 @@ matrix_data = list(
   is_matrix = is.matrix(matrix),
   dimension = dim(matrix),
   number_of_row = nrow(matrix),
-  number_of_colum = ncol(matrix),
+  number_of_col = ncol(matrix),
   sum_of_columns = colSums(matrix),
   sum_of_first_two_row = rowSums(matrix[1:2,]),
   sum_of_all_elemets = sum(matrix))
