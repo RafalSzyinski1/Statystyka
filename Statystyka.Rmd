@@ -443,7 +443,22 @@ matrix_data
 
 # Przedziały ufności
 
+Przedziały ufności są narzędziem statystycznym używanym do oszacowania niepewności związanej z estymacją parametrów populacji na podstawie próby. Wyrażają zakres wartości, w którym z określonym poziomem ufności, mieści się prawdziwa wartość parametru populacyjnego.
+
+Aby wyznaczyć przedział ufności w przypadku gdy populacja ma rozkład normalny, lub próba jest wystarczająco duża, można wyznaczyć za pomocą wzoru:
+
+$$
+\mu \pm z \cdot \frac{\sigma}{\sqrt{n}}
+$$
+Gdzie $z$ jest wartością z rozkładu normalnego odpowiadającą wybranemu poziomowi ufności.
+
 ## Zmienna numeryczna
+
+Zmienna numeryczna to zmienna, która przyjmuje wartości liczbowe i umożliwia wykonywanie na nich operacji arytmetycznych, takich jak dodawanie, odejmowanie, mnożenie i dzielenie.
+
+**Problem:**
+
+
 
 ```{r numeric_confidence_intervals}
 x <- data$items
@@ -461,6 +476,11 @@ upper_bound <- x_mean + (z * x_sd / sqrt(n))
 lower_bound
 upper_bound
 ```
+
+**Interpretacja wyników:**
+
+* Z $99\%$ pewnością możemy stwierdzić, że prawdziwa średnia populacji dla zmiennej mieści się w przedziale od 2.317891 do 2.399765.
+
 
 ## Zmienna jakościowa
 
