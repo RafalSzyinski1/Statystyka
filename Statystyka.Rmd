@@ -61,8 +61,8 @@ Do obliczenia podstawowych statystyk używa się funkcji `summary()`, która wyl
 * *1st Qu.* - Wartość pierwszego kwartylu (25% wyników jest poniżej tej wartości).
 * *Median* - Wartość mediany.
 * *Mean* - Wartość średnia.
-* *3rd Qu.* - Wartość trzeciego kwartylu.
-* *Max.* - Wartość maksymalną (75% wyników jest poniżej tej wartości).
+* *3rd Qu.* - Wartość trzeciego kwartylu (75% wyników jest poniżej tej wartości).
+* *Max.* - Wartość maksymalną.
 
 ```{r summary_items_spent}
 summary(data$items) # Podstawowe statystyki dla kolumny items
@@ -320,7 +320,7 @@ ggplot() +
 
 Aby wygenerować wykres ciągły gęstości należy użyć funkcji `dnorm()`, do którego należy podać dane (x), wartość średnią (mean_x) oraz odchylenie standardowe (sd_x). Analogicznie działa funkcja `pnorm()` generująca wartości dla ciągłego wykresu dystrybuanty.
 
-Aby wygenerować wykres dyskretny wykres gęstości należy użyć funkcji `dbinom()`, do którego należy podać dane (x), ilość prób, (length(x)) oraz prawdopodobieństwo sukcesu dla każdej próby (które możemy policzyć $p = \frac{\mu}{length(x)}$). Analogicznie działa funkcja `pbinom()` generująca wartości dla dyskretnego wykresu dystrybuanty.
+Aby wygenerować wykres dyskretny wykres gęstości należy użyć funkcji `dbinom()`, do którego należy podać dane (x), ilość prób (length(x)) oraz prawdopodobieństwo sukcesu dla każdej próby (które możemy policzyć $p = \frac{\mu}{length(x)}$). Analogicznie działa funkcja `pbinom()` generująca wartości dla dyskretnego wykresu dystrybuanty.
 
 ```{r random_sample}
 x <- sort(data$birth_year) # Posortowane dane roku urodzenia
@@ -340,7 +340,7 @@ discreet_pbinom <- pbinom(x, length(x), mean_x / length(x))
 
 ## Obliczanie prawdopodobieństwa punktowego i przedziałowego
 
-Prawdopodobieństwo punktowe ($P(X = x)$) powinno być równe 0 gdyż pole pod wykresem w danych punkcie jest równe 0 dla wykresu ciągłego. 
+Prawdopodobieństwo punktowe ($P(X = x)$) powinno być równe 0, gdyż pole pod wykresem w danych punkcie jest równe 0 dla wykresu ciągłego. 
 
 Jeśli chcemy wyznaczyć prawdopodobieństwo punktowe należy skorzystać z wykresu dyskretnego, które będzie największym przybliżeniem wartości.
 
@@ -458,7 +458,7 @@ Zmienna numeryczna to zmienna, która przyjmuje wartości liczbowe i umożliwia 
 
 **Problem:**
 
-
+* Ile najczęściej przedmiotów kupują, ludzie z całej populacji, kartą.
 
 ```{r numeric_confidence_intervals}
 x <- data$items
@@ -479,12 +479,17 @@ upper_bound
 
 **Interpretacja wyników:**
 
-* Z $99\%$ pewnością możemy stwierdzić, że prawdziwa średnia populacji dla zmiennej mieści się w przedziale od 2.317891 do 2.399765.
-
+* Z $99\%$ pewnością możemy stwierdzić, że ilość kupowanych produktów w całej populacji mieści się w przedziale od 2.317891 do 2.399765.
+* Zwiększając parametr $\alpha$ przedział ufności zwiększa się.
 
 ## Zmienna jakościowa
 
-Przedział ufności Walda
+Przedziały ufności Walda są stosowane do oszacowania przedziałów ufności dla proporcji w próbie binarnej, gdzie wyniki mogą przyjmować jedną z dwóch wartości (np. sukces/porażka).
+
+
+**Problem:**
+
+* Jakie jest prawdopodobieństwo, że osoba z populacji używa karty Mastercard.
 
 ```{r qualitative_confidence_intervals}
 
@@ -492,7 +497,7 @@ cards_data <- data %>% group_by(card) %>% summarise(count = n())
 n <- length(data$card)
 p <- cards_data[cards_data$card == "Mastercard",]$count / n
 
-alpha <- 0.001
+alpha <- 0.01
 z <- qnorm(1 - alpha / 2)
 
 lower_bound <- p - z * sqrt(p * (1 - p) / n)
@@ -501,39 +506,106 @@ upper_bound <- p + z * sqrt(p * (1 - p) / n)
 lower_bound
 upper_bound
 ```
+**Interpretacja wyników:**
+
+* Z $99\%$ pewnością możemy stwierdzić, że prawdopodobieństwo posiadania karty Mastercard przez osobę w populacji mieści się w przedziale od 0.3167635 do 0.3316383.
 
 # Hipotezy
 
-## Test parametryczny - średnia urodzenia to 1960
+## Test parametryczny 1
+
+**Problem:**
+
+* Hipoteza zerowa: Średnia roków urodzenia w populacji wynosi 1960.
+* Hipoteza alternatywna: Średnia roków urodzenia w populacji nie jest równa 1960.
 
 ```{r a}
 birth_year_data <- data$birth_year
 
 t.test(birth_year_data, mu = 1960)
 ```
-## Test parametryczny - ludzie urodzeni w 1960 wydają więcej niż ludzie urodzeni 1970
+**Interpretacja wyników:**
+
+* Statystyka t wynosi -0.25629. Jest to miara odchylenia średniej próby od założonej średniej populacji (1960), wyrażona w jednostkach odchylenia standardowego.
+* Liczba stopni swobody wynosi 26279, co sugeruje, że próbka jest bardzo duża.
+* Wartość p wynosi 0.7977. Wartość p określa prawdopodobieństwo uzyskania wyniku tak ekstremalnego jak zaobserwowany, przy założeniu, że hipoteza zerowa jest prawdziwa.
+* Przedział ufności 95% dla średniej wynosi od 1959.763 do 1960.182. Oznacza to, że z 95% pewnością możemy stwierdzić, że prawdziwa średnia roków urodzenia w populacji mieści się w tym przedziale.
+
+## Test parametryczny 2
+
+**Problem:**
+
+* Hipoteza zerowa: Średnie wydatki w latach 1960 i 1970 są równe.
+* Hipoteza alternatywna: Średnie wydatki w latach 1960 i 1970 nie są równe.
 
 ```{r b}
 spent_1960 = data[data$birth_year == 1960,]$spent
 spent_1970 = data[data$birth_year == 1970,]$spent
 
+var(spent_1960)
+var(spent_1970)
+
 t.test(spent_1960, spent_1970)
 ```
+**Interpretacje wyników:**
+
+* Statystyka t wynosi 5.897. Wysoka wartość statystyki t wskazuje na dużą różnicę między średnimi próbkami w porównaniu z rozproszeniem danych.
+* Liczba stopni swobody wynosi 797.21, co jest skutkiem użycia testu t-Welcha, który nie zakłada równości wariancji między próbami.
+* Wartość p wynosi 5.464e-09. Jest to bardzo mała wartość, znacznie mniejsza niż typowy poziom istotności (np. 0.05).
+* Przedział ufności 95% dla różnicy średnich wynosi od 45.81122 do 91.52689. Oznacza to, że z 95% pewnością możemy stwierdzić, że rzeczywista różnica między średnimi wydatkami w latach 1960 i 1970 mieści się w tym przedziale.
+
 ## Test nieparametryczny 1
+
+**Problem:**
+
+* Hipoteza zerowa: Dane pochodzą z rozkładu normalnego.
+* Hipoteza alternatywna: Dane nie pochodzą z rozkładu normalnego.
+
+```{r shapiro}
+spent_1960 <- data[data$birth_year == 1960,]$spent
+shapiro.test(spent_1960)
+```
+**Interpretacja wyników:**
+
+* Statystyka W wynosi 0.85478. Wartość ta jest używana do oceny, jak dobrze dane pasują do rozkładu normalnego. Wartość W bliska 1 sugeruje, że dane są normalnie rozłożone, natomiast wartość znacznie mniejsza od 1 sugeruje, że dane nie są normalnie rozłożone.
 
 ## Test nieparamteryczny 2
 
+**Problem:**
+
+* Hipoteza zerowa: Rozkłady spent_1960 i spent_1970 są identyczne, czyli nie ma różnicy w medianach wydatków między 1960 a 1970 rokiem.
+* Hipoteza alternatywna: Rozkłady spent_1960 i spent_1970 różnią się, co oznacza, że istnieje różnica w medianach wydatków między 1960 a 1970 rokiem.
+
+```{r c}
+wilcox.test(spent_1960, spent_1970)
+```
+
+**Interpretacja wyników:**
+
+* Statystyka W wynosi 138673. Jest to suma rang dla jednej z grup, używana do oceny różnic między grupami.
+* Wartość p wynosi 1.682e-14. Jest to bardzo mała wartość, znacznie mniejsza niż typowy poziom istotności (np. 0.05).
 
 # Regresja liniowa
 
 ## Przygotowanie danych
 
-Powtórzony kod z wykresu liniowego
+Powtórzony kod z wykresu liniowego.
 
 ```{r data_prep_regresion}
 user_data <- data[data$custid == "8257-BKBEDP-MRF",]
 
-month_numeric <- c("January", "February", "March", "April","May", "June", "July", "August", "September", "October", "November", "December" )
+month_numeric <- c("January", 
+                   "February", 
+                   "March", 
+                   "April",
+                   "May", 
+                   "June", 
+                   "July", 
+                   "August", 
+                   "September", 
+                   "October", 
+                   "November", 
+                   "December")
 
 month <- match(user_data$month, month_numeric)
 
@@ -552,6 +624,7 @@ data_length = length(sorted_user$spent)
 x <- seq(from=1, to=data_length)
 model <- lm(sorted_user$spent ~ x)
 y <- model$coefficients[2] * x + model$coefficients[1]
+model
 ```
 
 ## Wykres
@@ -570,11 +643,14 @@ ggplot() +
     ) +
   scale_x_continuous(
     breaks= seq(from=1, to=data_length, by=5), 
-    labels=c(paste(rep(2007, 12), month_numeric, sep="-"), paste(rep(2008, 12), month_numeric, sep="-"))
+    labels=c(
+      paste(rep(2007, 12), month_numeric, sep="-"), 
+      paste(rep(2008, 12), month_numeric, sep="-"))
     ) +
   labs(
-    title = "Wydatki użytkownika 8257-BKBEDP-MRF\nwzględem czasu (regresja liniowa)",
-    subtitle = sprintf("A = %.02f, B = %.02f", model$coefficients[2], model$coefficients[1]),
+    title = "Wydatki użytkownika 8257-BKBEDP-MRF\n
+    względem czasu (regresja liniowa)",
+    subtitle = sprintf("a = %.02f, b = %.02f", model$coefficients[2], model$coefficients[1]),
     x = NULL,
     y = "Sumaryczne wydatki"
   ) +
